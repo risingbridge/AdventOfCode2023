@@ -18,7 +18,6 @@ for(int y = 0; y < inputList.Count; y++){
 List<PartNumber> numbers = new List<PartNumber>();
 List<Symbol> symbols = new List<Symbol>();
 
-List<Vector2> usedNumbers = new List<Vector2>();
 for (int y = 0; y < width; y++){
     for(int x = 0; x < height; x++){
         // Console.Write(inputMap[x,y]);
@@ -26,7 +25,7 @@ for (int y = 0; y < width; y++){
             //Combine the numbers and add here
             PartNumber number = FindWholeNumber(new Vector2(x,y));
             // Console.WriteLine($"Found number {number.Number}");
-            if(!CheckIfNumberAlreadyFound(number)){
+            if(!CheckIfNumberAlreadyFound(number, numbers)){
                 numbers.Add(number);
             }
         }else if(inputMap[x,y] != '.'){
@@ -48,16 +47,90 @@ foreach(PartNumber n in numbers){
         }
     }
 }
-//Sums the numbers and returns
+//Sums the numbers and returns part one
 int PartOneSum = 0;
 foreach(PartNumber n in numbersToSum){
     PartOneSum += n.Number;
 }
 Console.WriteLine($"Part One: {PartOneSum}");
 
+//Solve part two
+List<Vector2> cogPositions = FindCogPositions(symbols);
+// Console.WriteLine($"Found {cogPositions.Count} cogs");
+List<PartNumber> CogFactors = new List<PartNumber>();
+int PartTwoSum = 0;
+foreach(Vector2 pos in cogPositions){
+    List<PartNumber> L = FindCogFactors(pos);
+    foreach(PartNumber p in L){
+        CogFactors.Add(p);
+    }
+    if(L.Count == 2){
+        int power = L[0].Number * L[1].Number;
+        PartTwoSum += power;
+    }
+}
+Console.WriteLine($"Part Two: {PartTwoSum}");
 
-bool CheckIfNumberAlreadyFound(PartNumber check){
-    foreach(PartNumber n in numbers){
+
+
+//Helper functions
+List<PartNumber> FindCogFactors(Vector2 pos){
+    List<PartNumber> partNumbers = new List<PartNumber>();
+
+    List<Vector2> testPositions =
+    [
+        new Vector2(pos.X - 1, pos.Y - 1),
+        new Vector2(pos.X, pos.Y - 1),
+        new Vector2(pos.X + 1, pos.Y - 1),
+        new Vector2(pos.X - 1, pos.Y),
+        new Vector2(pos.X + 1, pos.Y),
+        new Vector2(pos.X - 1, pos.Y + 1),
+        new Vector2(pos.X, pos.Y + 1),
+        new Vector2(pos.X + 1, pos.Y + 1),
+    ];
+    List<Vector2> adjecentPositions = new List<Vector2>();
+    foreach(Vector2 testPos in testPositions){
+        if(testPos.X >= 0 && testPos.X < width && testPos.Y >= 0 && testPos.Y < height){
+            if(char.IsNumber(inputMap[(int)testPos.X,(int)testPos.Y])){
+                adjecentPositions.Add(testPos);
+            }
+        }
+    }
+    //Find the part numbers for the positions
+
+    foreach(Vector2 p in adjecentPositions){
+        PartNumber adjNumber = FindPartNumberFromPos(p);
+        if(!CheckIfNumberAlreadyFound(adjNumber, partNumbers)){
+            partNumbers.Add(adjNumber);
+        }
+    }
+    return partNumbers;
+}
+
+List<Vector2> FindCogPositions(List<Symbol> symbolList){
+    List<Vector2> positions = new List<Vector2>();
+    foreach(Symbol s in symbolList){
+        if(s.Character == '*'){
+            positions.Add(s.Position);
+        }
+    }
+    return positions;
+}
+
+PartNumber FindPartNumberFromPos(Vector2 pos){
+    foreach(PartNumber n in numbersToSum){
+        foreach(Vector2 p in n.Positions){
+            if(p == pos){
+                return n;
+            }
+        }
+    }
+
+    return null;
+}
+
+bool CheckIfNumberAlreadyFound(PartNumber check, List<PartNumber> partNumbers){
+    foreach(PartNumber n in partNumbers){
         if(ComparePartNumbers(check, n)){
             return true;
         }
