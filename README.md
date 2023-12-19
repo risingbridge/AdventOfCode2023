@@ -11,7 +11,7 @@ All projects have at least two input-files. debug.txt uses the example-data from
 
 Day 01: 2 :star:  
 Day 02: 2 :star:  
-Day 03: 0 :star:  
+Day 03: 1 :star:  
 Day 04: 0 :star:  
 Day 05: 0 :star:  
 Day 06: 0 :star:  
